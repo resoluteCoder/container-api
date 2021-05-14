@@ -18,11 +18,8 @@ const runCommand = async (command) => {
 }
 
 app.get('/containers', async (req, res) => {
-    const psCmd = `podman ps --format '{"id": "{{.ID}}", \
-    "image": "{{.Image}}", "name": "{{.Names}}"}' |
-        tr -s "\n" ","`;
-    const data = await runCommand(psCmd);
-    res.json((`[${data.substring(0,data.length-1)}]`));
+    const data = await runCommand('podman ps --format json');
+    res.json(data);
 })
 
 app.post('/container', async (req, res) => {
