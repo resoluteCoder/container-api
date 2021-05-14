@@ -17,6 +17,14 @@ const runCommand = async (command) => {
     return stdout;
 }
 
+app.get('/containers', async (req, res) => {
+    const psCmd = `podman ps --format '{"id": "{{.ID}}", \
+    "image": "{{.Image}}", "name": "{{.Names}}"}' |
+        tr -s "\n" ","`;
+    const data = await runCommand(psCmd);
+    res.json((`[${data.substring(0,data.length-1)}]`));
+})
+
 app.post('/container', async (req, res) => {
     const data = await runCommand('podman run -d --name test rhscl/httpd-24-rhel7');
     res.json(data);
