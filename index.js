@@ -2,11 +2,13 @@ const express = require('express')
 const cors = require('cors');
 const util = require('util');
 const exec= util.promisify(require('child_process').exec);
+const bodyParser = require('body-parser');
 
 
 const app = express()
 
 
+app.use(bodyParser.json());
 app.use(cors());
 const port = 3000
 
@@ -18,7 +20,7 @@ const runCommand = async (command) => {
 }
 
 app.get('/containers', async (req, res) => {
-    const data = await runCommand('podman ps --format json');
+    const data = await runCommand('podman ps -a --format json');
     res.json(data);
 })
 
@@ -32,9 +34,10 @@ app.get('/data', async (req, res) => {
     res.json(JSON.parse(data));
 })
 
-app.delete('/container', async (req, res) => {
-    await runCommand('podman stop test');
-    const data = await runCommand('podman rm test');
+app.delete('/containers', async (req, res) => {
+    const args = req.body.join(' ');
+    await runCommand('podman stop ' + args);
+    const data = await runCommand('podman rm ' + args);
     res.json(data);
 });
 
