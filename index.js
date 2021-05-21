@@ -25,14 +25,22 @@ app.get('/containers', async (req, res) => {
 })
 
 app.post('/container', async (req, res) => {
-    const data = await runCommand('podman run -d --name test rhscl/httpd-24-rhel7');
+    const data = await runCommand('podman run -d ' + req.body.name);
     res.json(data);
 });
 
 app.get('/data', async (req, res) => {
-    const data = await runCommand('podman inspect test');
+    const args = req.query.containers.join(' ');
+    const data = await runCommand(`podman inspect ${args} --format json`);
     res.json(JSON.parse(data));
 })
+
+app.put('/containers', async (req,res) => {
+    const {name, status} = req.body;
+    const subCommand = status === 'running' ? 'stop' : 'start';
+    const data = await runCommand(`podman ${subCommand} ${name}`);
+    res.json(data);
+});
 
 app.delete('/containers', async (req, res) => {
     const args = req.body.join(' ');
